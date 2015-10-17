@@ -4,7 +4,7 @@ import cv2
 # 0 - black
 # 255 - white
 
-THRESHOLD = 70
+THRESHOLD = 75
 
 def rgb2gray(frame):
     return np.inner(frame, [0.2989, 0.587, 0.114]).astype(np.uint8)	
@@ -19,10 +19,11 @@ while(True):
     ret, frame = cap.read()
     
     gray = rgb2gray(frame)
-    gray = binarize(gray)
-
+    gray_bin = binarize(gray)
+    # t = otsu(gray_bin)
+    
     # Display the resulting frame
-    cv2.imshow('frame', gray)
+    cv2.imshow('frame', gray_bin)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
