@@ -1,8 +1,16 @@
 import numpy as np
 import cv2
 
+# 0 - black
+# 255 - white
+
+THRESHOLD = 100
+
 def rgb2gray(frame):
     return np.inner(frame, [0.2989, 0.587, 0.114]).astype(np.uint8)	
+
+def binarize(gray):
+	return np.where(gray < THRESHOLD, gray, 0)
 
 cap = cv2.VideoCapture(0)
 
@@ -11,6 +19,7 @@ while(True):
     ret, frame = cap.read()
     
     gray = rgb2gray(frame)
+    gray = binarize(gray)
 
     # Display the resulting frame
     cv2.imshow('frame', gray)
