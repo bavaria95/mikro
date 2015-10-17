@@ -4,13 +4,13 @@ import cv2
 # 0 - black
 # 255 - white
 
-THRESHOLD = 100
+THRESHOLD = 70
 
 def rgb2gray(frame):
     return np.inner(frame, [0.2989, 0.587, 0.114]).astype(np.uint8)	
 
 def binarize(gray):
-	return np.where(gray < THRESHOLD, gray, 0)
+    return np.where(gray < THRESHOLD, gray, 255)
 
 cap = cv2.VideoCapture(0)
 
