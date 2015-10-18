@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from otsu import otsu
+# from otsu import otsu
 
 # 0 - black
 # 255 - white
