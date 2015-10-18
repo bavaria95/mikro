@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-im = cv2.imread("photo_2.jpg")
+im = cv2.imread("rsz_digits.jpg")
 
 im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 im_gray = cv2.GaussianBlur(im_gray, (5, 5), 0)
