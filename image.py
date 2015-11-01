@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-# from otsu import otsu
+from otsu import otsu
 
 # 0 - black
 # 255 - white
@@ -8,7 +8,7 @@ import cv2
 THRESHOLD = 75
 
 def rgb2gray(frame):
-    return np.inner(frame, [0.2989, 0.587, 0.114]).astype(np.uint8)	
+    return np.inner(frame, [0.2989, 0.587, 0.114]).astype(np.uint8)
 
 def binarize(gray):
     threshold = otsu(gray)
