@@ -13,9 +13,17 @@ def binarize(gray):
     # threshold = 55
     return np.where(gray < threshold, np.uint8(255), np.uint8(0))
 
+def inept_or_not(rect):
+    w = rect[2]
+    h = rect[3]
 
-im = cv2.imread("real.jpg")
-# im = cv2.imread("photo_2.jpg")
+    return (10 <= w <= 500) and (10 <= h <= 500) and (0.5 <= float(w) / h <= 2.0)
+
+def filter_inept_rects(rects):
+    return list(filter(inept_or_not, rects))
+
+# im = cv2.imread("real.jpg")
+im = cv2.imread("photo_2.jpg")
 
 
 im_gray = rgb2gray(im)
@@ -31,6 +39,10 @@ ctrs, hier = cv2.findContours(im_th.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_
 rects = [cv2.boundingRect(ctr) for ctr in ctrs]
 
 print(rects)
+
+rects = filter_inept_rects(rects)
+
+
 for rect in rects:
     cv2.rectangle(im, (rect[0], rect[1]), (rect[0] + rect[2], rect[1] + rect[3]), (0, 0, 255), 2) 
 
