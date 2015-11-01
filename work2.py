@@ -22,6 +22,22 @@ def inept_or_not(rect):
 def filter_inept_rects(rects):
     return list(filter(inept_or_not, rects))
 
+def draw_rectangle(im, rect):
+    c = (0, 0, 255)
+    y, x = rect[0], rect[1]
+    w, h = rect[2], rect[3]
+
+    for i in range(x, x + h):
+        for j in range(-1, 2):
+            im[i, y + j] = c
+            im[i, y + w + j] = c
+
+    for i in range(y, y + w):
+        for j in range(-1, 2):
+            im[x + j, i] = c
+            im[x + h + j, i] = c
+
+
 # im = cv2.imread("real.jpg")
 im = cv2.imread("photo_2.jpg")
 
@@ -38,14 +54,12 @@ while True:
 ctrs, hier = cv2.findContours(im_th.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 rects = [cv2.boundingRect(ctr) for ctr in ctrs]
 
-print(rects)
+# print(rects)
 
 rects = filter_inept_rects(rects)
 
-
 for rect in rects:
-    cv2.rectangle(im, (rect[0], rect[1]), (rect[0] + rect[2], rect[1] + rect[3]), (0, 0, 255), 2) 
-
+	draw_rectangle(im, rect)
 
 cv2.imshow("Resulting Image with Rectangular ROIs", im)
 while True:

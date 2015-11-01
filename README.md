@@ -1,0 +1,1 @@
+University project, which aim is to create a system to recognize digits on live video-stream.
