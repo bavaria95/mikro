@@ -49,9 +49,9 @@ def rotation_matrix(img, angle):
 
 
 
-# im = cv2.imread("real.jpg")
+im = cv2.imread("real.jpg")
 # im = cv2.imread("photo_2.jpg")
-im = cv2.imread("rsz_digits.jpg")
+# im = cv2.imread("rsz_digits.jpg")
 
 
 im_gray = rgb2gray(im)
@@ -82,44 +82,47 @@ while True:
 
 black_img = np.array([[np.uint8(255)]*1000]*400)
 
-# i = 0
-# j = 0
-# for rect in rects:
-#     y, x, w, h = rect[:]
-#     print(x, y, w, h)
-#     r = im_th[x:x+h+1, y:y+w+1]
-#     r = cv2.resize(r, (30, 30), interpolation=cv2.INTER_LANCZOS4)
-#     black_img[j:j+30, i:i+30] = r
-#     i += 50
-#     if i >= 900:
-#         i = 0
-#         j += 50
-
-# code for rotation:
-# rows,cols = r.shape
-# M = cv2.getRotationMatrix2D((cols/2, rows/2), 45, 1)
-# r = cv2.warpAffine(r, M, (cols, rows))
-
-
-rect = rects[3]
 i = 0
 j = 0
-for k in range(0, 370, 10):
+for rect in rects:
     y, x, w, h = rect[:]
-    print(x, y, w, h)
-    r = im_th[x:x+h, y:y+w]
-    r = cv2.resize(r, (30, 30), interpolation=cv2.INTER_LANCZOS4)
-    
-    rows,cols = r.shape
-    # M = cv2.getRotationMatrix2D((cols/2, rows/2), k, 1)
-    M = rotation_matrix(r, k)
-    r = cv2.warpAffine(r, M, (cols, rows))
-    
+    r = im_th[x:x+h+1, y:y+w+1]
+    r = cv2.resize(r, (30, 30), interpolation=cv2.INTER_CUBIC)
+
+    # rows,cols = r.shape
+    # M = rotation_matrix(r, 90)
+    # r = cv2.warpAffine(r, M, (cols, rows))
+
     black_img[j:j+30, i:i+30] = r
     i += 50
     if i >= 900:
         i = 0
         j += 50
+
+# code for rotation:
+# rows,cols = r.shape
+# # M = cv2.getRotationMatrix2D((cols/2, rows/2), 45, 1)
+# M = rotation_matrix(r, angle)
+# r = cv2.warpAffine(r, M, (cols, rows))
+
+
+# rect = rects[3]
+# i = 0
+# j = 0
+# for k in range(0, 370, 10):
+#     y, x, w, h = rect[:]
+#     r = im_th[x:x+h, y:y+w]
+#     r = cv2.resize(r, (30, 30), interpolation=cv2.INTER_LANCZOS4)
+    
+#     rows,cols = r.shape
+#     M = rotation_matrix(r, k)
+#     r = cv2.warpAffine(r, M, (cols, rows))
+    
+#     black_img[j:j+30, i:i+30] = r
+#     i += 50
+#     if i >= 900:
+#         i = 0
+#         j += 50
 
 
 cv2.imshow("Resulting Image with Rectangular ROIs", black_img)
