@@ -6,5 +6,6 @@ At first you should compile WorkingNetwork into shared library
 	gcc -shared -o WorkingNetwork.so -fPIC WorkingNetwork.c
 ```
 
-`c.py` - with library written in C
+`c.py` - with library written in C  
+
 `p.py` - with library written in Python
