@@ -2,6 +2,15 @@ import numpy as np
 import cv2
 from otsu import otsu
 import math
+import pickle
+from network import *
+
+from ctypes import *
+from numpy.ctypeslib import ndpointer
+
+cdll.LoadLibrary('WorkingNetwork.so')
+
+libc = CDLL('WorkingNetwork.so')
 
 # 0 - black
 # 255 - white
@@ -18,7 +27,7 @@ def inept_or_not(rect):
     w = rect[2]
     h = rect[3]
 
-    return (10 <= w <= 500) and (10 <= h <= 500) and (0.5 <= float(w) / h <= 2.0)
+    return (15 <= w <= 500) and (15 <= h <= 500) and (0.5 <= float(w) / h <= 2.0)
 
 def filter_inept_rects(rects):
     return list(filter(inept_or_not, rects))
@@ -30,8 +39,14 @@ def draw_rectangle(im, rect):
 
     for i in range(x, x + h):
         for j in range(-1, 2):
-            im[i, y + j] = c
-            im[i, y + w + j] = c
+            try:
+                im[i, y + j] = c
+            except:
+                pass
+            try:
+                im[i, y + w + j] = c
+            except:
+            	pass
 
     for i in range(y, y + w):
         for j in range(-1, 2):
@@ -46,16 +61,39 @@ def rotation_matrix(img, angle):
     return np.array([[alpha, betta, (1 - alpha)*center_x - betta*center_y],
                      [-betta, alpha, betta*center_x + (1 - alpha)*center_y]])
 
+def rotate_im(img, angle):
+    rows, cols = img.shape
+    M = rotation_matrix(img, angle)
+    r = cv2.warpAffine(img, M, (cols, rows))
+
+    return r
+
+
+def network_output(pyarr):
+    arr = (c_double * len(pyarr))(*pyarr)
+    libc.neuralNetwork.restype = ndpointer(dtype=c_double, shape=(10,))
+    return libc.neuralNetwork(arr)
+
+
+def recognize_digit(img):
+
+    return np.argmax(network_output(img))
 
 
 
-im = cv2.imread("real.jpg")
-# im = cv2.imread("photo_2.jpg")
-# im = cv2.imread("rsz_digits.jpg")
+im = cv2.imread("photo_2.jpg")
 
 
 im_gray = rgb2gray(im)
+im_gray = cv2.GaussianBlur(im_gray, (5, 5), 1)
 im_th = binarize(im_gray)
+
+
+cv2.imshow("Thresholded image", im_gray)
+while True:
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
 
 cv2.imshow("Thresholded image", im_th)
 while True:
@@ -73,56 +111,30 @@ rects = filter_inept_rects(rects)
 for rect in rects:
     draw_rectangle(im, rect)
 
-
-cv2.imshow("Resulting Image with Rectangular ROIs", im)
-while True:
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-
-black_img = np.array([[np.uint8(255)]*1000]*400)
+# black canvas to draw all found ROIs
+black_img = np.array([[np.uint8(255)]*1200]*500)
 
 i = 0
 j = 0
 for rect in rects:
     y, x, w, h = rect[:]
-    r = im_th[x:x+h+1, y:y+w+1]
-    r = cv2.resize(r, (30, 30), interpolation=cv2.INTER_CUBIC)
+    w2, h2 = int(w * 0.35), int(h * 0.35)
 
-    # rows,cols = r.shape
-    # M = rotation_matrix(r, 90)
-    # r = cv2.warpAffine(r, M, (cols, rows))
+    r = im_th[x-h2:x+h+h2, y-w2:y+w+w2]
+    r = cv2.resize(r, (28, 28), interpolation=cv2.INTER_CUBIC)
 
-    black_img[j:j+30, i:i+30] = r
+    black_img[j:j+28, i:i+28] = r
     i += 50
     if i >= 900:
         i = 0
         j += 50
 
-# code for rotation:
-# rows,cols = r.shape
-# # M = cv2.getRotationMatrix2D((cols/2, rows/2), 45, 1)
-# M = rotation_matrix(r, angle)
-# r = cv2.warpAffine(r, M, (cols, rows))
 
+    # converting pixels into (0.0, 1.0) range
+    roi = r.reshape((784, 1))/255.0
+    predicted_digit = recognize_digit(roi)
 
-# rect = rects[3]
-# i = 0
-# j = 0
-# for k in range(0, 370, 10):
-#     y, x, w, h = rect[:]
-#     r = im_th[x:x+h, y:y+w]
-#     r = cv2.resize(r, (30, 30), interpolation=cv2.INTER_LANCZOS4)
-    
-#     rows,cols = r.shape
-#     M = rotation_matrix(r, k)
-#     r = cv2.warpAffine(r, M, (cols, rows))
-    
-#     black_img[j:j+30, i:i+30] = r
-#     i += 50
-#     if i >= 900:
-#         i = 0
-#         j += 50
+    cv2.putText(im, str(predicted_digit), (rect[0], rect[1]),cv2.FONT_HERSHEY_DUPLEX, 2, (0, 255, 255), 2)
 
 
 cv2.imshow("Resulting Image with Rectangular ROIs", black_img)
@@ -131,21 +143,7 @@ while True:
         break
 
 
-# cap = cv2.VideoCapture(0)
-
-# while(True):
-#     # Capture frame-by-frame
-#     ret, frame = cap.read()
-    
-#     gray = rgb2gray(frame)
-#     gray_bin = binarize(gray)
-
-#     # edges = cv2.Canny(gray_bin,100,200)
-#     # Display the resulting frame
-#     cv2.imshow('frame', gray_bin)
-#     if cv2.waitKey(1) & 0xFF == ord('q'):
-#         break
-
-# # When everything done, release the capture
-# cap.release()
-# cv2.destroyAllWindows()
+cv2.imshow("Resulting Image with Rectangular ROIs", im)
+while True:
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break

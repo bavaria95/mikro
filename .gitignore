@@ -1,0 +1,5 @@
+mnist.pkl.gz
+digits_cls.pkl
+digits_cls_svc_train.pkl
+WorkingNetwork.so
+*.pyc
